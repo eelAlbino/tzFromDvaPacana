@@ -4,6 +4,7 @@
     <br>
 </p>
 
+> После пуша Laravel в ваш репозиторий, сделайте задание в любой другой ветке и PR в основную.
 
 Задача: подключить 2 платёжных шлюза (приём платежей).
 
@@ -63,7 +64,7 @@ app_key=rTaasVHeteGbhwBx
 |-------------|---------|-----------------------------------------------------------------------|
 | project | Integer | ID of merchant                                                        |
 | invoice  | Integer | Merchant's payment ID                                                 |
-| status      | String  | Payment status. Could be new, pending, completed, expired or rejected |
+| status      | String  | Payment status. Could be created, inprogress, paid, expired or rejected |
 | amount      | Integer | Payment amount                                                        |
 | amount_paid | Integer | Actually paid amount (in merchant's currency)                         |
 | rand   | String | Random string                                                     |
@@ -75,12 +76,12 @@ app_key=rTaasVHeteGbhwBx
 1. Отсортировать параметры по алфавиту.
 2. Объединить поля, используя разделитель `.`.
 3. К концу получившейся строки добавить `app_key`.
-4. Получить из неё строки MD5 хеш.
+4. Получить из неё MD5 хеш.
 
 ### Пример запроса:
 ```
 Headers:
-    Authorization: e56bd4dcdc0348357a5f3d0408b5cdf2d54fb88ced4d791aee133d0a4b86793f
+    Authorization: d84eb9036bfc2fa7f46727f101c73c73
 Body:
 {
     "project": 816,
