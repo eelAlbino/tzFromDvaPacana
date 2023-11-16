@@ -8,9 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use App\Models\PaymentGateway;
 use Exception;
+use Throwable;
 
 /**
  * Отправка данных по оплате на шлюз в момент обновления элемента оплаты
@@ -39,18 +41,24 @@ class SendUpdatedPaymentToGatewayJob implements ShouldQueue
     public function handle(): void
     {
         $payment = $this->payment($this->paymentID);
-        if (!$payment) {
-            throw new Exception('Элемент оплаты с id '. $this->paymentID .' не найден');
+        try {
+            if (!$payment) {
+                throw new Exception('Элемент оплаты с id '. $this->paymentID .' не найден');
+            }
+            $paymentGateway = $payment->gateway()->first();
+            if (!$paymentGateway) {
+                throw new Exception('Для оплаты с id '. $this->paymentID .' не найден элемент шлюза');
+            }
+            $gatewayService = app('payment_gateway_'. $paymentGateway->code);
+            if (!$gatewayService) {
+                throw new Exception('Объект класса для работы с шлюзом оплаты '. $paymentGateway->code .' не найден');
+            }
+            $gatewayService->callback($paymentGateway)->sendUpdatedPayment($payment);
+        } catch (Throwable $e) {
+            // Тут в принципе ничего не было сказано по поводу обработки ошибки.
+            // Для примера добавил лог
+            Log::channel('payment_gateway_send_payment_on_update')->error($e->getMessage());
         }
-        $paymentGateway = $payment->gateway()->first();
-        if (!$paymentGateway) {
-            throw new Exception('Для оплаты с id '. $this->paymentID .' не найден элемент шлюза');
-        }
-        $gatewayService = app('payment_gateway_'. $paymentGateway->code);
-        if (!$gatewayService) {
-            throw new Exception('Объект класса для работы с шлюзом оплаты '. $paymentGateway->code .' не найден');
-        }
-        $gatewayService->callback($paymentGateway)->sendUpdatedPayment($payment);
     }
 
     /**

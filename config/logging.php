@@ -126,6 +126,11 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'payment_gateway_send_payment_on_update' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/payment_gateway/send/payment_on_update.log'),
+        ],
     ],
 
 ];
