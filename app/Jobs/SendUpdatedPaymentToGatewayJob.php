@@ -46,7 +46,11 @@ class SendUpdatedPaymentToGatewayJob implements ShouldQueue
         if (!$paymentGateway) {
             throw new Exception('Для оплаты с id '. $this->paymentID .' не найден элемент шлюза');
         }
-        // @todo: Вызов обработчика отправки
+        $gatewayService = app('payment_gateway_'. $paymentGateway->code);
+        if (!$gatewayService) {
+            throw new Exception('Объект класса для работы с шлюзом оплаты '. $paymentGateway->code .' не найден');
+        }
+        $gatewayService->callback($paymentGateway)->sendUpdatedPayment($payment);
     }
 
     /**
