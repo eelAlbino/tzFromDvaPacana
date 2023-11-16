@@ -1,0 +1,201 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Тестовое задание",
+        "description": "Для проведения теста необходимо сделать следующее:<ul><li>Установить миграции с сидами.</li><li>Заполнить необходимые доступы к шлюзам в env файле.</li><li>Настроить очереди</li><li>Выполнить запрос на обновление элемента оплаты</li></ul>После обновления элемента при помощи очереди в фоновом режиме происходит отправка данных оплаты в соответствующий шлюз",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/payments/{paymentID}/touch": {
+            "get": {
+                "tags": [
+                    "Оплаты"
+                ],
+                "summary": "Триггер обновления элемента оплаты",
+                "description": "",
+                "operationId": "payments_touch",
+                "parameters": [
+                    {
+                        "name": "paymentID",
+                        "in": "path",
+                        "description": "ID элемента оплаты",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Элемент успешно обновлен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "payload"
+                                    ],
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Элемент не обновлен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "payload"
+                                    ],
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "code": {
+                                                        "description": "Код ошибки",
+                                                        "example": "not_updated"
+                                                    },
+                                                    "message": {
+                                                        "description": "Описание ошибки",
+                                                        "example": "Элемент не обновлен"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "PaymentGateway": {
+                "description": "Шлюз оплаты",
+                "properties": {
+                    "code": {
+                        "description": "Уникальный код. Для шлюзов, указанных в задаче, через сидеры создаются элементы с кодами test_first и test_second",
+                        "type": "string",
+                        "example": "test_first"
+                    },
+                    "callback_url": {
+                        "description": "Url для передачи данных при изменении состояния платежа",
+                        "type": "string",
+                        "example": "https:/example.com/api/callback"
+                    },
+                    "callback_limit_day": {
+                        "description": "Лимит, после прохождения которого проведение платежей останавливается до следующего дня.",
+                        "type": "number",
+                        "example": "https:/example.com/api/callback"
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentStatus": {
+                "description": "Статус оплаты",
+                "properties": {
+                    "code": {
+                        "description": "Уникальный код. Хотел бы тут отметить, что в принципе по тз не описано, что именно со статусами делать надо, поэтому реализовал их так. Создание первоначальных статусов происходит через сидер",
+                        "type": "string",
+                        "example": "created"
+                    },
+                    "name": {
+                        "description": "Название",
+                        "type": "string",
+                        "example": "Создана"
+                    }
+                },
+                "type": "object"
+            },
+            "Payment": {
+                "description": "Элемент оплаты",
+                "properties": {
+                    "guid": {
+                        "description": "Внешний ID оплаты",
+                        "type": "number",
+                        "example": 123
+                    },
+                    "customer_id": {
+                        "description": "Внутренний ID покупателя",
+                        "type": "number",
+                        "example": 123
+                    },
+                    "gateway_id": {
+                        "description": "Внутренний ID шлюза",
+                        "type": "number",
+                        "example": 123
+                    },
+                    "status": {
+                        "description": "Внутренний код статуса",
+                        "type": "string",
+                        "example": "created"
+                    },
+                    "amount": {
+                        "description": "Число к оплате, в центах",
+                        "type": "number",
+                        "example": 5000
+                    },
+                    "amount_paid": {
+                        "description": "Уже оплачено, в центах",
+                        "type": "number",
+                        "example": 1000
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "responses": {
+            "NotFound": {
+                "description": "Ничего не найдено",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "success": {
+                                    "type": "boolean",
+                                    "example": false
+                                },
+                                "errors": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "code": {
+                                                "description": "Код ошибки",
+                                                "example": "not_found"
+                                            },
+                                            "message": {
+                                                "description": "Описание ошибки",
+                                                "example": "Элемент не найден"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

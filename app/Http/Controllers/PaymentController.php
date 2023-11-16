@@ -3,8 +3,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Contracts\Swagger\Controllers\IPaymentControllerSwagger;
 
-class PaymentController extends Controller
+class PaymentController extends Controller implements IPaymentControllerSwagger
 {
 
     /**
