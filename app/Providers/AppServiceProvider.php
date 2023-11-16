@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Регистрируем классы работы со шлюзами
+        $this->app->bind('payment_gateway_test_first', \App\PaymentGateways\TestFirst\Gateway::class);
+        $this->app->bind('payment_gateway_test_second', \App\PaymentGateways\TestSecond\Gateway::class);
     }
 
     /**
